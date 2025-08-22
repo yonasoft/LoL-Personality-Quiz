@@ -1,35 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import './App.css';
+import EnterQuiz from './pages/EnterQuiz.jsx';
+import QuestionPage from './pages/QuestionPage.jsx';
+import ResultsPage from './pages/ResultsPage.jsx';
+import { questions } from './data/questions.js';
+import { sampleResult } from './data/results.js';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentPage, setCurrentPage] = useState('enter');
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState([]);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  const startQuiz = () => {
+    setCurrentPage('question');
+    setCurrentQuestionIndex(0);
+    setAnswers([]);
+  };
+
+  const handleAnswerSelect = (answer, answerIndex) => {
+    const newAnswers = [...answers, answer];
+    setAnswers(newAnswers);
+
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      setCurrentPage('results');
+    }
+  };
+
+  const restartQuiz = () => {
+    setCurrentPage('enter');
+    setCurrentQuestionIndex(0);
+    setAnswers([]);
+  };
+
+  if (currentPage === 'enter') {
+    return <EnterQuiz onStartQuiz={startQuiz} />;
+  }
+
+  if (currentPage === 'question') {
+    const currentQuestion = questions[currentQuestionIndex];
+    return (
+      <QuestionPage
+        questionNumber={currentQuestionIndex + 1}
+        totalQuestions={questions.length}
+        scenario={currentQuestion.scenario}
+        question={currentQuestion.question}
+        answers={currentQuestion.answers}
+        onAnswerSelect={handleAnswerSelect}
+      />
+    );
+  }
+
+  if (currentPage === 'results') {
+    return (
+      <ResultsPage
+        result={sampleResult}
+        onRestart={restartQuiz}
+      />
+    );
+  }
+
+  return null;
 }
 
 export default App
